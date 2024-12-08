@@ -1,11 +1,17 @@
-const token = "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";
+const token = "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"; // For production, store this on the server
 const inputTxt = document.getElementById("input");
 const image = document.getElementById("image");
 const button = document.getElementById("btn");
+const loadingIndicator = document.getElementById("loadingIndicator"); // Assuming you have a loading indicator element
 
 async function query() {
   try {
-    image.src = "load.gif";
+    // Show loading GIF
+    if (loadingIndicator) {
+      loadingIndicator.style.display = 'block'; // Show loading
+    }
+    image.src = ""; // Clear previous image
+
     const response = await fetch(
       "https://api-inference.huggingface.co/models/openfree/flux-lora-korea-palace",
       {
@@ -19,7 +25,7 @@ async function query() {
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
     }
 
     const result = await response.blob();
@@ -27,6 +33,11 @@ async function query() {
   } catch (error) {
     console.error("Error during API call:", error);
     throw error;
+  } finally {
+    // Hide loading GIF after the request is complete
+    if (loadingIndicator) {
+      loadingIndicator.style.display = 'none'; // Hide loading
+    }
   }
 }
 
@@ -43,12 +54,13 @@ if (button) {
       const objectURL = URL.createObjectURL(response);
 
       if (image) {
-        image.src = objectURL;
+        image.src = objectURL; // Display the generated image
       } else {
         console.error("Image element not found");
       }
     } catch (error) {
       console.error("Error processing image:", error);
+      alert('An error occurred while generating the image. Please try again.');
     }
   });
 } else {
